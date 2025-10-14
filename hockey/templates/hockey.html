@@ -1,0 +1,48 @@
+<h1>Hockey Stats Recorder</h1>
+<div class="tabs">
+  <button onclick="showTab('play')">Play Tab</button>
+  <button onclick="showTab('goal')">Goal Tab</button>
+</div>
+
+<div id="play" class="tab-content">
+  <h2>Play Actions</h2>
+  <button onclick="recordAction('Shot')">Shot</button>
+  <button onclick="recordAction('Good Pass')">Good Pass</button>
+  <button onclick="recordAction('Bad Pass')">Bad Pass</button>
+</div>
+
+<div id="goal" class="tab-content" style="display:none;">
+  <h2>Goal Actions</h2>
+  <button onclick="recordAction('Goal')">Goal</button>
+  <button onclick="recordAction('Assist')">Assist</button>
+</div>
+
+<h2>Recorded Actions</h2>
+<ul id="log"></ul>
+
+<script>
+function showTab(tab) {
+  document.getElementById('play').style.display = tab === 'play' ? 'block' : 'none';
+  document.getElementById('goal').style.display = tab === 'goal' ? 'block' : 'none';
+}
+
+function recordAction(action) {
+  const timestamp = new Date().toLocaleTimeString();
+  const log = document.getElementById('log');
+  const entry = document.createElement('li');
+  entry.textContent = `${timestamp}: ${action}`;
+  log.appendChild(entry);
+
+  // Send to backend to save
+  fetch("/record", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action })
+  })
+  .then(res => res.json())
+  .then(data => console.log("Saved:", data))
+  .catch(err => console.error("Error:", err));
+}
+</script>
+
+
