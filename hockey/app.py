@@ -60,7 +60,7 @@ selected_players = st.multiselect(
     max_selections=5
 )
 
-FLASK_URL = os.getenv("FLASK_URL", "http://127.0.0.1:5000")
+FLASK_URL = "https://amaksym07-github-io-1.onrender.com"
 
 def send_to_flask(player, action, line_id, line_diff):
     try:
