@@ -38,16 +38,14 @@ if "lines" not in st.session_state:
 # ----------------------------
 st.title("🏒 Hockey Tracker")
 
-st.subheader("Select Active Players (5 Max)")
+st.subheader("Select Active Players")
 selected_players = st.multiselect(
-    "Choose 5 players currently on the ice:",
+    "Choose players currently on the ice:",
     players,
     max_selections=5
 )
 
-if len(selected_players) < 5:
-    st.warning(f"Please select {5 - len(selected_players)} more player(s).")
-elif len(selected_players) == 5:
+if len(selected_players) <= 5:
     st.success("✅ Active players selected!")
 
     line_id = "_".join(sorted(selected_players))
@@ -102,4 +100,44 @@ elif len(selected_players) == 5:
         df_summary = pd.DataFrame(summary_data, columns=["Player"] + actions)
         st.table(df_summary)
 
-    # --
+    # ----------------------------
+    # TAB 2 - Goal Log
+    # ----------------------------
+    with tab2:
+        st.header("Goal Log")
+
+        for p in selected_players:
+            st.session_state.lines[line_id]["player_stats"].setdefault(p, {"Goal": 0, "Assist": 0})
+            cols = st.columns([1,1,1], gap="small")
+            cols[0].markdown(f"**{p}**")
+
+            # Goal button
+            if cols[1].button("🟩 Goal", key=f"goal-{p}"):
+                current_line["player_stats"][p]["Goal"] += 1
+                current_line["line_diff"] += 1
+                st.toast(f"🥅 Goal for {p} (+1 Line)")
+
+            # Assist button
+            if cols[2].button("🟨 Assist", key=f"assist-{p}"):
+                current_line["player_stats"][p]["Assist"] += 1
+                st.toast(f"🟨 Assist for {p}")
+
+        st.divider()
+
+        # Goal Allowed
+        if st.button("🟥 🚫 Goal Allowed (Line)", key="goal-allowed"):
+            current_line["line_diff"] -= 1
+            st.toast("🚫 Goal Allowed (−1 Line Differential)")
+
+        st.divider()
+
+        # Summary table
+        total_goals = sum(current_line["player_stats"][p]["Goal"] for p in selected_players)
+        total_assists = sum(current_line["player_stats"][p]["Assist"] for p in selected_players)
+
+        summary_data = [[p, current_line["player_stats"][p]["Goal"], current_line["player_stats"][p]["Assist"]] for p in selected_players]
+        summary_data.append(["Line", total_goals, total_assists, int(current_line["line_diff"])])
+
+        df_summary = pd.DataFrame(summary_data, columns=["Player", "Goals", "Assists", "Line +/-"])
+        df_summary["Line +/-"] = df_summary["Line +/-"].fillna(0).astype(int)
+        st.table(df_summary)
