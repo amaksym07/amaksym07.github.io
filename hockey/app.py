@@ -46,7 +46,6 @@ selected_players = st.multiselect(
 )
 
 if len(selected_players) <= 5:
-    st.success("✅ Active players selected!")
 
     line_id = "_".join(sorted(selected_players))
 
