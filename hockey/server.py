@@ -1,5 +1,5 @@
 # server.py
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 import pandas as pd
 import os
@@ -9,7 +9,7 @@ import traceback
 app = Flask(__name__)
 CORS(app)
 
-LOGS_FOLDER = "logs"
+LOGS_FOLDER = "/data/logs"
 os.makedirs(LOGS_FOLDER, exist_ok=True)
 
 def get_current_log_file():
@@ -19,6 +19,14 @@ def get_current_log_file():
         df = pd.DataFrame(columns=["Timestamp", "Line", "Player", "Action", "LineDifferential"])
         df.to_csv(file_path, index=False)
     return file_path
+
+@app.route("/download_csv", methods=["GET"])
+def download_csv():
+    file_path = get_current_log_file()
+    if os.path.exists(file_path):
+        return send_file(file_path, as_attachment=True)
+    return jsonify({"error": "No CSV file found"}), 404
+
 
 @app.route("/record", methods=["POST"])
 def record():
@@ -79,4 +87,6 @@ def load_line():
         return jsonify({"status": "error", "message": str(e)}), 500
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
+

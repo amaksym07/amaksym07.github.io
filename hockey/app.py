@@ -193,6 +193,13 @@ elif len(selected_players) == 5:
         df_summary["Line +/-"] = df_summary["Line +/-"].fillna(0).astype(int)  # 👈 converts float to int
         st.table(df_summary)
 
+st.markdown(f"""
+<a href="{FLASK_URL}/download_csv" target="_blank">
+    <button style="background-color:#4CAF50;color:white;padding:10px 20px;border:none;border-radius:6px;cursor:pointer;">
+        📥 Download CSV File
+    </button>
+</a>
+""", unsafe_allow_html=True)
 
 
 
