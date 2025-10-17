@@ -48,7 +48,7 @@ def record():
         file_path = get_current_log_file()
 
         new_row = pd.DataFrame([[timestamp, line_id, player, action, line_diff]],
-                               columns=["Timestamp", "LineID", "Player", "Action", "LineDifferential"])
+                               columns=["Timestamp", "Line", "Player", "Action", "LineDifferential"])
         new_row.to_csv(file_path, mode="a", header=False, index=False)
 
         print(f"✅ {timestamp}: {player} - {action} ({line_id}) | LineDiff={line_diff}")
