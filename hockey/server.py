@@ -9,7 +9,7 @@ import traceback
 app = Flask(__name__)
 CORS(app)
 
-LOGS_FOLDER = "/data/logs"
+LOGS_FOLDER = "./logs"
 os.makedirs(LOGS_FOLDER, exist_ok=True)
 
 def get_current_log_file():
