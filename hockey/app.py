@@ -146,38 +146,38 @@ if len(selected_players) <= 5 and selected_players:
         st.table(df_summary)
 
 # ----------------------------
-# Fetch All Player Stats from Flask
+# All Player Stats (Persistent across lines)
 # ----------------------------
 st.divider()
-st.subheader("📊 All Player Stats")
+st.subheader("📊 All Player Stats (Across All Lines)")
 
-try:
-    response = requests.post(f"{API_URL}/load_line", json={"line_id": "ALL"})
-    if response.status_code == 200:
-        data = response.json()
-        player_stats = data.get("player_stats", {})
+# Combine all players across all lines
+if st.session_state.lines:
+    combined_stats = {}
 
-        if player_stats:
-            # Convert player_stats dict to DataFrame
-            stats_df = pd.DataFrame([
-                {"Player": player, **stats}
-                for player, stats in player_stats.items()
-            ])
+    for line_data in st.session_state.lines.values():
+        for player, stats in line_data["player_stats"].items():
+            if player not in combined_stats:
+                combined_stats[player] = stats.copy()
+            else:
+                for k, v in stats.items():
+                    combined_stats[player][k] = combined_stats[player].get(k, 0) + v
 
-            st.dataframe(stats_df, use_container_width=True)
+    # Convert to DataFrame
+    all_players_df = pd.DataFrame([
+        {"Player": p, **combined_stats[p]} for p in combined_stats
+    ])
 
-            # Convert to CSV for download
-            csv_buffer = io.StringIO()
-            stats_df.to_csv(csv_buffer, index=False)
-            st.download_button(
-                label="📥 Download Player Stats (CSV)",
-                data=csv_buffer.getvalue(),
-                file_name="player_stats.csv",
-                mime="text/csv"
-            )
-        else:
-            st.info("No player stats recorded yet.")
-    else:
-        st.error("Failed to load player stats from server.")
-except Exception as e:
-    st.error(f"Error contacting Flask API: {e}")
+    st.dataframe(all_players_df, use_container_width=True)
+
+    # Download button
+    csv_buffer = io.StringIO()
+    all_players_df.to_csv(csv_buffer, index=False)
+    st.download_button(
+        label="📥 Download All Player Stats (CSV)",
+        data=csv_buffer.getvalue(),
+        file_name="all_player_stats.csv",
+        mime="text/csv"
+    )
+else:
+    st.info("No player stats recorded yet.")
