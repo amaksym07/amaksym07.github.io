@@ -1,6 +1,10 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime
+import requests
+import io
+
+API_URL = "https://amaksym07-github-io-1.onrender.com"
 
 st.set_page_config(page_title="Hockey Tracker", layout="wide")
 
@@ -45,7 +49,7 @@ selected_players = st.multiselect(
     max_selections=5
 )
 
-if len(selected_players) <= 5:
+if len(selected_players) <= 5 and selected_players:
 
     line_id = "_".join(sorted(selected_players))
 
@@ -140,3 +144,40 @@ if len(selected_players) <= 5:
         df_summary = pd.DataFrame(summary_data, columns=["Player", "Goals", "Assists", "Line +/-"])
         df_summary["Line +/-"] = df_summary["Line +/-"].fillna(0).astype(int)
         st.table(df_summary)
+
+# ----------------------------
+# Fetch All Player Stats from Flask
+# ----------------------------
+st.divider()
+st.subheader("📊 All Player Stats")
+
+try:
+    response = requests.post(f"{API_URL}/load_line", json={"line_id": "ALL"})
+    if response.status_code == 200:
+        data = response.json()
+        player_stats = data.get("player_stats", {})
+
+        if player_stats:
+            # Convert player_stats dict to DataFrame
+            stats_df = pd.DataFrame([
+                {"Player": player, **stats}
+                for player, stats in player_stats.items()
+            ])
+
+            st.dataframe(stats_df, use_container_width=True)
+
+            # Convert to CSV for download
+            csv_buffer = io.StringIO()
+            stats_df.to_csv(csv_buffer, index=False)
+            st.download_button(
+                label="📥 Download Player Stats (CSV)",
+                data=csv_buffer.getvalue(),
+                file_name="player_stats.csv",
+                mime="text/csv"
+            )
+        else:
+            st.info("No player stats recorded yet.")
+    else:
+        st.error("Failed to load player stats from server.")
+except Exception as e:
+    st.error(f"Error contacting Flask API: {e}")
