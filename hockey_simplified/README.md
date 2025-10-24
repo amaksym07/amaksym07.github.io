@@ -1,4 +1,4 @@
-\# Hockey Tracker
+simplified hockey tracker. doesn't have player selection and uses +, -
 
 
 
