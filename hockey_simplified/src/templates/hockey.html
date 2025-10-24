@@ -187,57 +187,62 @@ button.download:hover {
 <script>
 const players = {{ players|tojson }};
 const actions = {{ actions|tojson }};
-const colorHex = {
-  "Goal":"#28a745","Assist":"#ffc107","+":"#28a745","-":"#dc3545",
-  "Shot":"#17a2b8","Good Pass":"#28a745","Bad Pass":"#ffc107",
-  "No Pass":"#dc3545","Takeaway":"#28a745","Giveaway":"#dc3545"
-};
-const classMap = {
-  "Goal":"goal","Assist":"assist","+":"plus","-":"minus",
-  "Shot":"shot","Good Pass":"goodpass","Bad Pass":"badpass",
-  "No Pass":"nopass","Takeaway":"takeaway","Giveaway":"giveaway"
-};
-const playerStats = {};
-players.forEach(p=>{playerStats[p]={};actions.forEach(a=>playerStats[p][a]=0);});
 
-function openTab(id){
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+const colorHex = {
+  "Goal": "#28a745", "Assist": "#ffc107", "+": "#28a745", "-": "#dc3545",
+  "Shot": "#17a2b8", "Good Pass": "#28a745", "Bad Pass": "#ffc107",
+  "No Pass": "#dc3545", "Takeaway": "#28a745", "Giveaway": "#dc3545"
+};
+
+const classMap = {
+  "Goal": "goal", "Assist": "assist", "+": "plus", "-": "minus",
+  "Shot": "shot", "Good Pass": "goodpass", "Bad Pass": "badpass",
+  "No Pass": "nopass", "Takeaway": "takeaway", "Giveaway": "giveaway"
+};
+
+const playerStats = {};
+players.forEach(p => { playerStats[p] = {}; actions.forEach(a => playerStats[p][a] = 0); });
+
+function openTab(id) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
 
-function renderButtons(){
-  const goalDiv=document.getElementById('goalTab');
-  const activeDiv=document.getElementById('activeTab');
-  goalDiv.innerHTML=''; activeDiv.innerHTML='';
-
-  players.forEach(player=>{
-    const gRow=document.createElement('div');
-    gRow.className='player-row';
-    gRow.innerHTML=`<strong>${player}</strong>`;
-    const gGrid=document.createElement('div'); gGrid.className='btn-grid';
-    ["Goal","Assist","+","-"].forEach(a=>{
-      const btn=document.createElement('button');
-      btn.className=`action ${classMap[a]}`;
-      btn.textContent=a;
-      btn.style.background=colorHex[a];
-      if(a==="Assist") btn.style.color="#111";
-      btn.onclick=()=>recordAction(player,a);
+function renderButtons() {
+  const goalDiv = document.getElementById('goalTab');
+  const activeDiv = document.getElementById('activeTab');
+  goalDiv.innerHTML = '';
+  activeDiv.innerHTML = '';
+  players.forEach(player => {
+    const gRow = document.createElement('div');
+    gRow.className = 'player-row';
+    gRow.innerHTML = `<strong>${player}</strong>`;
+    const gGrid = document.createElement('div');
+    gGrid.className = 'btn-grid';
+    ["Goal", "Assist", "+", "-"].forEach(a => {
+      const btn = document.createElement('button');
+      btn.className = `action ${classMap[a]}`;
+      btn.textContent = a;
+      btn.style.background = colorHex[a];
+      if (a === "Assist") btn.style.color = "#111";
+      btn.onclick = () => recordAction(player, a);
       gGrid.appendChild(btn);
     });
     gRow.appendChild(gGrid);
     goalDiv.appendChild(gRow);
 
-    const aRow=document.createElement('div');
-    aRow.className='player-row';
-    aRow.innerHTML=`<strong>${player}</strong>`;
-    const aGrid=document.createElement('div'); aGrid.className='btn-grid';
-    ["Shot","Good Pass","Bad Pass","No Pass","Takeaway","Giveaway"].forEach(a=>{
-      const btn=document.createElement('button');
-      btn.className=`action ${classMap[a]}`;
-      btn.textContent=a;
-      btn.style.background=colorHex[a];
-      if(a==="Bad Pass") btn.style.color="#111";
-      btn.onclick=()=>recordAction(player,a);
+    const aRow = document.createElement('div');
+    aRow.className = 'player-row';
+    aRow.innerHTML = `<strong>${player}</strong>`;
+    const aGrid = document.createElement('div');
+    aGrid.className = 'btn-grid';
+    ["Shot", "Good Pass", "Bad Pass", "No Pass", "Takeaway", "Giveaway"].forEach(a => {
+      const btn = document.createElement('button');
+      btn.className = `action ${classMap[a]}`;
+      btn.textContent = a;
+      btn.style.background = colorHex[a];
+      if (a === "Bad Pass") btn.style.color = "#111";
+      btn.onclick = () => recordAction(player, a);
       aGrid.appendChild(btn);
     });
     aRow.appendChild(aGrid);
@@ -245,29 +250,41 @@ function renderButtons(){
   });
 }
 
-async function recordAction(player, action){
-  try{
-    const resp=await fetch('/record',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({player,action})});
-    const js=await resp.json();
-    if(js.status==="ok"){playerStats[player][action]++;updateTable();}
-    else alert("Error: "+(js.message||"server error"));
-  }catch(err){alert("Could not reach server.");console.error(err);}
+async function recordAction(player, action) {
+  try {
+    const resp = await fetch('/record', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ player, action })
+    });
+    const js = await resp.json();
+    if (js.status === "ok") {
+      playerStats[player][action]++;
+      saveStats();
+      updateTable();
+    } else alert("Error: " + (js.message || "server error"));
+  } catch (err) {
+    alert("Could not reach server.");
+    console.error(err);
+  }
 }
 
-function updateTable(){
-  const tbody=document.querySelector('#statsTable tbody');
-  tbody.innerHTML='';
-  players.forEach(p=>{
-    const tr=document.createElement('tr');
-    const tdName=document.createElement('td'); tdName.textContent=p; tr.appendChild(tdName);
-    actions.forEach(a=>{
-      const td=document.createElement('td');
-      const val=playerStats[p][a]||0;
-      td.textContent=val;
-      if(val>0){
-        td.style.background=colorHex[a];
-        td.style.color=(a==="Assist"||a==="Bad Pass")?"#111":"#fff";
-        td.style.fontWeight="600";
+function updateTable() {
+  const tbody = document.querySelector('#statsTable tbody');
+  tbody.innerHTML = '';
+  players.forEach(p => {
+    const tr = document.createElement('tr');
+    const tdName = document.createElement('td');
+    tdName.textContent = p;
+    tr.appendChild(tdName);
+    actions.forEach(a => {
+      const td = document.createElement('td');
+      const val = playerStats[p][a] || 0;
+      td.textContent = val;
+      if (val > 0) {
+        td.style.background = colorHex[a];
+        td.style.color = (a === "Assist" || a === "Bad Pass") ? "#111" : "#fff";
+        td.style.fontWeight = "600";
       }
       tr.appendChild(td);
     });
@@ -275,53 +292,75 @@ function updateTable(){
   });
 }
 
-function downloadCSV(){
-  const header=["Player",...actions];
-  const rows=players.map(p=>[p,...actions.map(a=>playerStats[p][a]||0)]);
-  let csv=header.join(",")+"\n"+rows.map(r=>r.join(",")).join("\n");
-  const blob=new Blob([csv],{type:"text/csv"});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');
-  a.href=url; a.download=`player_stats_${new Date().toISOString().slice(0,10)}.csv`; a.click();
+// --------------------------
+// 🔒 Local Storage Functions
+// --------------------------
+function saveStats() {
+  localStorage.setItem("playerStats", JSON.stringify(playerStats));
+}
+
+function loadStats() {
+  const saved = localStorage.getItem("playerStats");
+  if (saved) {
+    const data = JSON.parse(saved);
+    for (const p of players) {
+      for (const a of actions) {
+        if (data[p] && data[p][a] !== undefined)
+          playerStats[p][a] = data[p][a];
+      }
+    }
+  }
+}
+
+// 🧹 Clear local storage at midnight (optional)
+function clearAtMidnight() {
+  const now = new Date();
+  const msUntilMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 1) - now;
+  setTimeout(() => {
+    localStorage.removeItem("playerStats");
+    location.reload();
+  }, msUntilMidnight);
+}
+
+function resetAll() {
+  if (confirm("Are you sure you want to reset all player stats?")) {
+    // Clear in-memory data
+    for (const p of players) {
+      for (const a of actions) {
+        playerStats[p][a] = 0;
+      }
+    }
+    // Clear saved data in localStorage
+    localStorage.removeItem("playerStats");
+
+    // Update table and notify server (optional)
+    updateTable();
+    alert("All stats have been reset!");
+  }
+}
+
+
+function downloadCSV() {
+  const header = ["Player", ...actions];
+  const rows = players.map(p => [p, ...actions.map(a => playerStats[p][a] || 0)]);
+  let csv = header.join(",") + "\n" + rows.map(r => r.join(",")).join("\n");
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `player_stats_${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
   URL.revokeObjectURL(url);
 }
 
-async function resetAll(){
-  if(!confirm("Are you sure you want to reset all stats?")) return;
-  try{
-    const resp = await fetch('/reset',{method:'POST'});
-    const js = await resp.json();
-    if(js.status === "ok"){
-      players.forEach(p => actions.forEach(a => playerStats[p][a] = 0));
-      updateTable();
-    } else alert("Error resetting stats.");
-  }catch(err){
-    alert("Could not reset stats.");
-    console.error(err);
-  }
-}
-
-async function loadStats(){
-  try {
-    const resp = await fetch("/get_stats");
-    const data = await resp.json();
-    data.forEach(row => {
-      const player = row.Player;
-      actions.forEach(a => {
-        playerStats[player][a] = row[a] || 0;
-      });
-    });
-    updateTable();
-  } catch(err){
-    console.error("Failed to load stats:", err);
-  }
-}
-
+// --------------------------
+// 🚀 Initialize Everything
+// --------------------------
+loadStats();
 renderButtons();
-updateTable();  // ✅ This ensures rows are visible from the start
-loadStats();    // Then load and update real values from Flask
-
-
+updateTable();
+clearAtMidnight();
 </script>
+
 </body>
 </html>
