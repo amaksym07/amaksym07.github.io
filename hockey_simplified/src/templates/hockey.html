@@ -166,7 +166,10 @@ button.download:hover {
 
 <h2>All Player Stats</h2>
 <div class="container">
+  <button class="download" onclick="resetAll()" style="background:#dc3545;margin-bottom:10px;">Reset All</button>
+
   <table id="statsTable">
+
     <thead>
       <tr>
         <th>Player</th>
@@ -283,8 +286,42 @@ function downloadCSV(){
   URL.revokeObjectURL(url);
 }
 
+async function resetAll(){
+  if(!confirm("Are you sure you want to reset all stats?")) return;
+  try{
+    const resp = await fetch('/reset',{method:'POST'});
+    const js = await resp.json();
+    if(js.status === "ok"){
+      players.forEach(p => actions.forEach(a => playerStats[p][a] = 0));
+      updateTable();
+    } else alert("Error resetting stats.");
+  }catch(err){
+    alert("Could not reset stats.");
+    console.error(err);
+  }
+}
+
+async function loadStats(){
+  try {
+    const resp = await fetch("/get_stats");
+    const data = await resp.json();
+    data.forEach(row => {
+      const player = row.Player;
+      actions.forEach(a => {
+        playerStats[player][a] = row[a] || 0;
+      });
+    });
+    updateTable();
+  } catch(err){
+    console.error("Failed to load stats:", err);
+  }
+}
+
 renderButtons();
-updateTable();
+updateTable();  // ✅ This ensures rows are visible from the start
+loadStats();    // Then load and update real values from Flask
+
+
 </script>
 </body>
 </html>
