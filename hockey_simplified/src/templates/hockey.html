@@ -5,70 +5,171 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Hockey Tracker</title>
 <style>
-  :root{
-    --green: #28a745;
-    --yellow:#ffc107;
-    --blue:#007bff;
-    --red:#dc3545;
-    --teal:#17a2b8;
-    --gray:#6c757d;
-  }
+:root {
+  --bg: #0e1117;
+  --panel: #1a1f29;
+  --text: #e6e6e6;
+  --accent: #007bff;
+  --green: #28a745;
+  --yellow: #ffc107;
+  --red: #dc3545;
+  --teal: #17a2b8;
+  --border: #2c2f36;
+}
 
-  body { font-family: Arial, sans-serif; margin: 20px; background: #f9f9f9; color:#222; }
-  h1{ margin:0 0 12px 0; font-size:24px; }
-  .tabs button { margin-right: 8px; padding: 10px 16px; border: none; border-radius:6px; background:var(--blue); color:white; cursor:pointer; }
-  .controls { margin-top:12px; }
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  margin: 20px;
+  background: var(--bg);
+  color: var(--text);
+}
 
-  /* Action buttons */
-  button.action { border-radius:6px; font-weight:600; padding:10px 18px; margin:4px 6px 6px 0; cursor:pointer; border:none; color:white; display:inline-flex; align-items:center; justify-content:center; min-width:92px; }
-  button.goal    { background:var(--green); }
-  button.assist  { background:var(--yellow); color:#111; }
-  button.plus    { background:var(--green); font-size:22px; padding:10px 14px; min-width:70px; } /* bigger symbol */
-  button.minus   { background:var(--red);   font-size:22px; padding:10px 14px; min-width:70px; }
-  button.shot    { background:var(--teal); }
-  button.goodpass{ background:var(--green); }
-  button.badpass { background:var(--yellow); color:#111; }
-  button.nopass  { background:var(--red); }
-  button.takeaway{ background:var(--green); }
-  button.giveaway{ background:var(--red); }
+h1 {
+  margin: 0 0 16px 0;
+  font-size: 26px;
+  color: var(--accent);
+}
 
-  .tab { display:none; margin-top:10px; }
-  .tab.active { display:block; }
+.tabs {
+  margin-bottom: 16px;
+}
 
-  /* player row layout: player name + grid of buttons */
-  .player-row { display:flex; align-items:flex-start; gap:12px; margin-bottom:10px; flex-wrap:wrap; }
-  .player-row strong { width:160px; flex:0 0 160px; margin-top:6px; }
-  .btn-grid { display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+.tabs button {
+  margin-right: 8px;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 6px;
+  background: var(--accent);
+  color: white;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  font-weight: 500;
+}
+.tabs button:hover {
+  background: #3395ff;
+}
 
-  table { border-collapse: collapse; width:100%; margin-top:18px; background:white; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
-  th, td { border:1px solid #e6e6e6; padding:8px 10px; text-align:center; font-size:13px; }
-  th { background:#fafafa; font-weight:600; }
-  .download { margin-top:12px; padding:8px 14px; border:none; background:#333; color:white; border-radius:6px; cursor:pointer; }
+.container {
+  background: var(--panel);
+  border-radius: 10px;
+  padding: 18px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  margin-bottom: 22px;
+  border: 1px solid var(--border);
+}
 
-  /* small screens */
-  @media (max-width:720px){
-    .player-row strong { width:120px; flex:0 0 120px; }
-    button.action { min-width:78px; padding:8px 12px; }
-  }
+.player-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+.player-row strong {
+  width: 160px;
+  flex: 0 0 160px;
+  margin-top: 6px;
+  color: #fff;
+}
+.btn-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Buttons */
+button.action {
+  border-radius: 6px;
+  font-weight: 600;
+  padding: 10px 18px;
+  margin: 4px 4px 6px 0;
+  cursor: pointer;
+  border: none;
+  color: white;
+  transition: transform 0.1s ease, box-shadow 0.2s ease;
+}
+button.action:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 8px rgba(255,255,255,0.15);
+}
+button.goal    { background: var(--green); }
+button.assist  { background: var(--yellow); color:#111; }
+button.plus    { background: var(--green); font-size:20px; padding:10px 14px; min-width:60px; }
+button.minus   { background: var(--red);   font-size:20px; padding:10px 14px; min-width:60px; }
+button.shot    { background: var(--teal); }
+button.goodpass{ background: var(--green); }
+button.badpass { background: var(--yellow); color:#111; }
+button.nopass  { background: var(--red); }
+button.takeaway{ background: var(--green); }
+button.giveaway{ background: var(--red); }
+
+.tab { display: none; }
+.tab.active { display: block; }
+
+h2 {
+  color: var(--accent);
+  margin-top: 20px;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  background: var(--panel);
+  color: var(--text);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+th, td {
+  border: 1px solid var(--border);
+  padding: 10px 12px;
+  text-align: center;
+  font-size: 14px;
+}
+th {
+  background: #202632;
+  font-weight: 600;
+}
+
+button.download {
+  margin-top: 14px;
+  padding: 10px 18px;
+  border: none;
+  background: var(--accent);
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.2s ease;
+}
+button.download:hover {
+  background: #3395ff;
+}
+
+@media (max-width: 720px){
+  .player-row strong { width: 120px; flex: 0 0 120px; }
+  button.action { min-width: 78px; padding: 8px 12px; }
+}
 </style>
 </head>
 <body>
-  <h1>🏒 Hockey Tracker</h1>
 
-  <div class="tabs">
-    <button onclick="openTab('goalTab')">Goal Log</button>
-    <button onclick="openTab('activeTab')">Active Play</button>
-  </div>
+<h1>🏒 Hockey Tracker</h1>
 
-  <div id="goalTab" class="tab active controls"></div>
-  <div id="activeTab" class="tab controls"></div>
+<div class="tabs">
+  <button onclick="openTab('goalTab')">Goal Log</button>
+  <button onclick="openTab('activeTab')">Active Play</button>
+</div>
 
-  <h2 style="margin-top:18px;">All Player Stats</h2>
+<div id="goalTab" class="tab active container"></div>
+<div id="activeTab" class="tab container"></div>
+
+<h2>All Player Stats</h2>
+<div class="container">
   <table id="statsTable">
     <thead>
       <tr>
         <th>Player</th>
-        <!-- Jinja will render the headers -->
         {% for action in actions %}
           <th>{{ action }}</th>
         {% endfor %}
@@ -78,81 +179,62 @@
   </table>
 
   <button class="download" onclick="downloadCSV()">Download CSV</button>
+</div>
 
 <script>
-/* Data from Flask context */
 const players = {{ players|tojson }};
 const actions = {{ actions|tojson }};
-
-/* Color palette used for both buttons and table cells */
 const colorHex = {
-  "Goal":      "#28a745",
-  "Assist":    "#ffc107",
-  "+":         "#28a745",
-  "-":         "#dc3545",
-  "Shot":      "#17a2b8",
-  "Good Pass": "#28a745",
-  "Bad Pass":  "#ffc107",
-  "No Pass":   "#dc3545",
-  "Takeaway":  "#28a745",
-  "Giveaway":  "#dc3545"
+  "Goal":"#28a745","Assist":"#ffc107","+":"#28a745","-":"#dc3545",
+  "Shot":"#17a2b8","Good Pass":"#28a745","Bad Pass":"#ffc107",
+  "No Pass":"#dc3545","Takeaway":"#28a745","Giveaway":"#dc3545"
 };
-
-/* maps action names to CSS class suffix used for button creation */
 const classMap = {
   "Goal":"goal","Assist":"assist","+":"plus","-":"minus",
   "Shot":"shot","Good Pass":"goodpass","Bad Pass":"badpass",
   "No Pass":"nopass","Takeaway":"takeaway","Giveaway":"giveaway"
 };
-
-/* in-memory stats */
 const playerStats = {};
-players.forEach(p => { playerStats[p] = {}; actions.forEach(a=>playerStats[p][a]=0); });
+players.forEach(p=>{playerStats[p]={};actions.forEach(a=>playerStats[p][a]=0);});
 
-/* switch tab */
 function openTab(id){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
 
-/* render buttons (clear containers first so re-render doesn't duplicate) */
 function renderButtons(){
-  const goalDiv = document.getElementById('goalTab');
-  const activeDiv = document.getElementById('activeTab');
-  goalDiv.innerHTML = '';
-  activeDiv.innerHTML = '';
+  const goalDiv=document.getElementById('goalTab');
+  const activeDiv=document.getElementById('activeTab');
+  goalDiv.innerHTML=''; activeDiv.innerHTML='';
 
-  players.forEach(player => {
-    // Goal row: Goal, Assist, +, -
-    const gRow = document.createElement('div');
-    gRow.className = 'player-row';
-    gRow.innerHTML = `<strong>${player}</strong>`;
-    const gGrid = document.createElement('div'); gGrid.className = 'btn-grid';
+  players.forEach(player=>{
+    const gRow=document.createElement('div');
+    gRow.className='player-row';
+    gRow.innerHTML=`<strong>${player}</strong>`;
+    const gGrid=document.createElement('div'); gGrid.className='btn-grid';
     ["Goal","Assist","+","-"].forEach(a=>{
-      const btn = document.createElement('button');
-      btn.className = `action ${classMap[a]}`;
-      btn.textContent = a;
-      btn.onclick = ()=>recordAction(player,a);
-      // set inline background color to be explicit (keeps consistent if CSS changes)
-      btn.style.background = colorHex[a];
-      if(a === "Assist") btn.style.color = "#111";
+      const btn=document.createElement('button');
+      btn.className=`action ${classMap[a]}`;
+      btn.textContent=a;
+      btn.style.background=colorHex[a];
+      if(a==="Assist") btn.style.color="#111";
+      btn.onclick=()=>recordAction(player,a);
       gGrid.appendChild(btn);
     });
     gRow.appendChild(gGrid);
     goalDiv.appendChild(gRow);
 
-    // Active row: Shot, Good Pass, Bad Pass, No Pass, Takeaway, Giveaway
-    const aRow = document.createElement('div');
-    aRow.className = 'player-row';
-    aRow.innerHTML = `<strong>${player}</strong>`;
-    const aGrid = document.createElement('div'); aGrid.className = 'btn-grid';
+    const aRow=document.createElement('div');
+    aRow.className='player-row';
+    aRow.innerHTML=`<strong>${player}</strong>`;
+    const aGrid=document.createElement('div'); aGrid.className='btn-grid';
     ["Shot","Good Pass","Bad Pass","No Pass","Takeaway","Giveaway"].forEach(a=>{
-      const btn = document.createElement('button');
-      btn.className = `action ${classMap[a]}`;
-      btn.textContent = a;
-      btn.onclick = ()=>recordAction(player,a);
-      btn.style.background = colorHex[a];
-      if(a === "Bad Pass") btn.style.color = "#111";
+      const btn=document.createElement('button');
+      btn.className=`action ${classMap[a]}`;
+      btn.textContent=a;
+      btn.style.background=colorHex[a];
+      if(a==="Bad Pass") btn.style.color="#111";
+      btn.onclick=()=>recordAction(player,a);
       aGrid.appendChild(btn);
     });
     aRow.appendChild(aGrid);
@@ -160,72 +242,47 @@ function renderButtons(){
   });
 }
 
-/* record action -> POST to /record, update local state on success */
 async function recordAction(player, action){
   try{
-    const resp = await fetch('/record', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({player, action})
-    });
-    const js = await resp.json();
-    if(js.status === "ok"){
-      playerStats[player][action] += 1;
-      updateTable();
-    } else {
-      alert("Error: " + (js.message || "server error"));
-    }
-  } catch(err){
-    console.error(err);
-    alert("Could not reach server. Is Flask running?");
-  }
+    const resp=await fetch('/record',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({player,action})});
+    const js=await resp.json();
+    if(js.status==="ok"){playerStats[player][action]++;updateTable();}
+    else alert("Error: "+(js.message||"server error"));
+  }catch(err){alert("Could not reach server.");console.error(err);}
 }
 
-/* update the stats table */
 function updateTable(){
-  const tbody = document.querySelector('#statsTable tbody');
-  tbody.innerHTML = '';
+  const tbody=document.querySelector('#statsTable tbody');
+  tbody.innerHTML='';
   players.forEach(p=>{
-    const tr = document.createElement('tr');
-    // Player cell
-    const first = document.createElement('td');
-    first.textContent = p;
-    tr.appendChild(first);
-
-    // stat cells
+    const tr=document.createElement('tr');
+    const tdName=document.createElement('td'); tdName.textContent=p; tr.appendChild(tdName);
     actions.forEach(a=>{
-      const td = document.createElement('td');
-      const val = playerStats[p][a] || 0;
-      td.textContent = val;
-      if(val > 0){
-        td.style.background = colorHex[a];
-        // choose readable text color (yellow background needs dark text)
-        td.style.color = (a === "Assist" || a === "Bad Pass") ? "#111" : "#fff";
-        td.style.fontWeight = "600";
-      } else {
-        td.style.background = "transparent";
-        td.style.color = "#222";
-        td.style.fontWeight = "400";
+      const td=document.createElement('td');
+      const val=playerStats[p][a]||0;
+      td.textContent=val;
+      if(val>0){
+        td.style.background=colorHex[a];
+        td.style.color=(a==="Assist"||a==="Bad Pass")?"#111":"#fff";
+        td.style.fontWeight="600";
       }
       tr.appendChild(td);
     });
-
     tbody.appendChild(tr);
   });
 }
 
-/* download CSV from memory */
 function downloadCSV(){
-  const header = ["Player", ...actions];
-  const rows = players.map(p => [p, ...actions.map(a => playerStats[p][a] || 0)]);
-  let csv = header.join(",") + "\n" + rows.map(r => r.join(",")).join("\n");
-  const blob = new Blob([csv], {type:"text/csv"});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href = url; a.download = `player_stats_${new Date().toISOString().slice(0,10)}.csv`; a.click();
+  const header=["Player",...actions];
+  const rows=players.map(p=>[p,...actions.map(a=>playerStats[p][a]||0)]);
+  let csv=header.join(",")+"\n"+rows.map(r=>r.join(",")).join("\n");
+  const blob=new Blob([csv],{type:"text/csv"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download=`player_stats_${new Date().toISOString().slice(0,10)}.csv`; a.click();
   URL.revokeObjectURL(url);
 }
 
-/* init */
 renderButtons();
 updateTable();
 </script>
