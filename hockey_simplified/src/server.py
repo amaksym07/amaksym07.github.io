@@ -6,21 +6,54 @@ from datetime import datetime
 app = Flask(__name__, template_folder="templates")
 CORS(app)
 
-# In-memory stats
-players = [
-    "Connor McDavid", "Leon Draisaitl", "Auston Matthews", "Sidney Crosby",
-    "Nathan MacKinnon", "Cale Makar", "David Pastrnak", "Kirill Kaprizov",
-    "Elias Pettersson", "Jack Hughes", "Mitch Marner", "Brady Tkachuk",
-    "Nikita Kucherov", "Mikko Rantanen", "Matthew Tkachuk"
-]
-
+# -----------------------------
+# In-memory data
+# -----------------------------
+players = []
 actions = ["Goal", "Assist", "+", "-", "Shot", "Good Pass", "Bad Pass", "No Pass", "Takeaway", "Giveaway"]
-player_stats = {p: {a: 0 for a in actions} for p in players}
+player_stats = {}
 
 
+# -----------------------------
+# Helper
+# -----------------------------
+def init_player(name):
+    player_stats[name] = {a: 0 for a in actions}
+
+
+# -----------------------------
+# Routes
+# -----------------------------
 @app.route("/")
 def index():
-    return render_template("hockey.html", players=players, actions=actions)
+    return render_template("hockey.html", actions=actions, players=players)
+
+
+@app.route("/team", methods=["GET", "POST", "DELETE"])
+def team():
+    global players
+
+    if request.method == "GET":
+        return jsonify({"players": players})
+
+    data = request.get_json(force=True)
+    name = data.get("name", "").strip()
+
+    if request.method == "POST":
+        if not name:
+            return jsonify({"status": "error", "message": "Player name required"}), 400
+        if name in players:
+            return jsonify({"status": "error", "message": "Player already exists"}), 400
+        players.append(name)
+        init_player(name)
+        return jsonify({"status": "ok"})
+
+    elif request.method == "DELETE":
+        if name not in players:
+            return jsonify({"status": "error", "message": "Player not found"}), 404
+        players.remove(name)
+        player_stats.pop(name, None)
+        return jsonify({"status": "ok"})
 
 
 @app.route("/record", methods=["POST"])
@@ -41,7 +74,7 @@ def record():
 
 @app.route("/download_csv")
 def download_csv():
-    df = pd.DataFrame([{"Player": p, **player_stats[p]} for p in players])
+    df = pd.DataFrame([{"Player": p, **player_stats.get(p, {a: 0 for a in actions})} for p in players])
     csv_data = df.to_csv(index=False)
     filename = f'player_stats_{datetime.now().strftime("%Y%m%d")}.csv'
     return csv_data, 200, {

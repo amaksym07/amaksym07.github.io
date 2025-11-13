@@ -361,6 +361,114 @@ renderButtons();
 updateTable();
 clearAtMidnight();
 </script>
+<!-- 🧑‍🤝‍🧑 Team Modal -->
+<div id="teamModal" style="
+  display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+  background:rgba(0,0,0,0.6); align-items:center; justify-content:center;
+">
+  <div style="background:#1a1f29; padding:20px; border-radius:10px; width:320px;">
+    <h2 style="margin-top:0;color:#007bff;">Team Management</h2>
+    <div id="teamList" style="margin-bottom:10px;"></div>
+    <input id="newPlayer" placeholder="New player name" style="width:100%;padding:8px;margin-bottom:10px;border-radius:6px;border:none;">
+    <button onclick="addPlayer()" style="background:#28a745;color:white;border:none;padding:8px 12px;border-radius:6px;">Add</button>
+    <button onclick="closeTeamModal()" style="margin-left:8px;background:#dc3545;color:white;border:none;padding:8px 12px;border-radius:6px;">Close</button>
+  </div>
+</div>
+
+<button class="download" onclick="openTeamModal()" style="margin-top:20px;">Manage Players</button>
+
+<script>
+// --------------------------
+// 🧑‍🤝‍🧑 Team Management
+// --------------------------
+async function fetchTeam() {
+  const res = await fetch("/team");
+  const data = await res.json();
+  return data.players;
+}
+
+async function renderTeamList() {
+  const list = document.getElementById('teamList');
+  list.innerHTML = '';
+  const team = await fetchTeam();
+
+  team.forEach(p => {
+    const div = document.createElement('div');
+    div.style.display = 'flex';
+    div.style.justifyContent = 'space-between';
+    div.style.marginBottom = '6px';
+    div.innerHTML = `
+      <span>${p}</span>
+      <button onclick="deletePlayer('${p}')" style="background:#dc3545;border:none;color:white;border-radius:6px;padding:3px 6px;">✖</button>
+    `;
+    list.appendChild(div);
+  });
+}
+
+function openTeamModal() {
+  document.getElementById('teamModal').style.display = 'flex';
+  renderTeamList();
+}
+
+function closeTeamModal() {
+  document.getElementById('teamModal').style.display = 'none';
+}
+
+async function addPlayer() {
+  const input = document.getElementById('newPlayer');
+  const name = input.value.trim();
+  if (!name) return;
+  const res = await fetch("/team", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ name })
+  });
+  const data = await res.json();
+  if (data.status === "ok") {
+    input.value = "";
+    await renderTeamList();
+    await refreshPlayers();
+  } else {
+    alert(data.message);
+  }
+}
+
+async function deletePlayer(name) {
+  if (!confirm(`Remove ${name}?`)) return;
+  const res = await fetch("/team", {
+    method: "DELETE",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ name })
+  });
+  const data = await res.json();
+  if (data.status === "ok") {
+    await renderTeamList();
+    await refreshPlayers();
+  } else {
+    alert(data.message);
+  }
+}
+
+// --------------------------
+// 🔄 Refresh Players
+// --------------------------
+async function refreshPlayers() {
+  const team = await fetchTeam();
+  players.length = 0;
+  team.forEach(p => players.push(p));
+
+  // Reset stats if new players were added
+  team.forEach(p => {
+    if (!playerStats[p]) {
+      playerStats[p] = {};
+      actions.forEach(a => playerStats[p][a] = 0);
+    }
+  });
+
+  renderButtons();
+  updateTable();
+}
+</script>
 
 </body>
 </html>
