@@ -72,11 +72,14 @@ def record():
     return jsonify({"status": "error", "message": "Invalid player/action"}), 400
 
 
+from zoneinfo import ZoneInfo
+
 @app.route("/download_csv")
 def download_csv():
+    mountain_time = datetime.now(ZoneInfo("Canada/Mountain"))
     df = pd.DataFrame([{"Player": p, **player_stats.get(p, {a: 0 for a in actions})} for p in players])
     csv_data = df.to_csv(index=False)
-    filename = f'player_stats_{datetime.now().strftime("%Y%m%d")}.csv'
+    filename = f'player_stats_{mountain_time.strftime("%Y%m%d")}.csv'
     return csv_data, 200, {
         'Content-Type': 'text/csv',
         'Content-Disposition': f'attachment; filename="{filename}"'

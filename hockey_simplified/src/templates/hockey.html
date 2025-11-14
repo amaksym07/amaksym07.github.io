@@ -348,7 +348,11 @@ function downloadCSV() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `player_stats_${new Date().toISOString().slice(0, 10)}.csv`;
+ const d = new Date();
+const yyyy = d.getFullYear();
+const mm = String(d.getMonth() + 1).padStart(2, "0");
+const dd = String(d.getDate()).padStart(2, "0");
+a.download = `player_stats_${yyyy}${mm}${dd}.csv`;
   a.click();
   URL.revokeObjectURL(url);
 }
